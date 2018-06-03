@@ -1,10 +1,13 @@
 package mdg.com.notifs;
 
+import android.arch.persistence.room.Room;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Build;
 import android.provider.Settings;
+import android.support.annotation.RequiresApi;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -22,36 +25,56 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity {
 
     ListView listView;
+    ArrayList<String> notifsList;
+    private static final String DATABASE_NAME = "notifications_database";
+    NotifDatabase database;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        startService(new Intent(this, NotifService.class));
+        //startService(new Intent(this, NotifService.class));
 
+        String currentDBPath = getDatabasePath(DATABASE_NAME).getAbsolutePath();
 
-     //   listView = (ListView) findViewById(R.id.list);
+        listView = (ListView) findViewById(R.id.list);
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Msg"));
-        ArrayList<String> notifsList = new ArrayList<>();
-        notifsList.add("Mansi");
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(),
-                android.R.layout.simple_list_item_1, android.R.id.text1,
-                notifsList);
+        notifsList = new ArrayList<>();
 
-
-     //   listView.setAdapter(adapter);
-    }
+        database = Room.databaseBuilder(getApplicationContext(),NotifDatabase.class,DATABASE_NAME)
+                .fallbackToDestructiveMigration()
+                .build();
+        }
 
     private BroadcastReceiver onNotice = new BroadcastReceiver() {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            String title = intent.getStringExtra("title");
-            String text = intent.getStringExtra("text");
-            String app_name = intent.getStringExtra("app name");
-            Log.e("Main app", app_name);
-            Log.e("main title", title);
-            Log.e("main text", text);
+            final String title = intent.getStringExtra("title");
+            final String text = intent.getStringExtra("text");
+            final String app_name = intent.getStringExtra("app name");
+
+            Log.e("title", title);
+            Log.e("text", text);
+            Log.e("app_name", app_name);
+            notifsList.add(title);
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(),
+                    android.R.layout.simple_list_item_1, android.R.id.text1,
+                    notifsList);
+            listView.setAdapter(adapter);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    Notifications notification =new Notifications();
+                    notification.setAppName(app_name);
+                    notification.setNotifTitle(title);
+                    notification.setNotifText(text);
+                    database.daoAccess ().insertSingleNotification(notification);
+                }
+            }) .start();
         }
     };
 
@@ -62,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP_MR1)
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()){
