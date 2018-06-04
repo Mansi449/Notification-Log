@@ -22,6 +22,17 @@ public class Notifications {
     @ColumnInfo(name = "notif_text")
     private String notifText;
 
+    @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
+    private byte[] image;
+
+    public byte[] getImage() {
+        return image;
+    }
+
+    public void setImage(byte[] image) {
+        this.image = image;
+    }
+
     public int getNotif_id() {
         return notif_id;
     }
