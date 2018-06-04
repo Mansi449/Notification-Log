@@ -32,7 +32,6 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String DATABASE_NAME = "notifications_database";
     NotifDatabase database;
-    ImageView imageView;
     byte[] byteArray;
 
     @Override
@@ -41,7 +40,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         startService(new Intent(this, NotifService.class));
 
-        imageView = findViewById(R.id.imageView);
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Msg"));
 
         /*
