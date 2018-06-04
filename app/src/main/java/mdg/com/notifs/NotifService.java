@@ -29,6 +29,7 @@ public class NotifService extends NotificationListenerService {
     public void onNotificationPosted(StatusBarNotification sbn) {
         super.onNotificationPosted(sbn);
 
+        String package_name = sbn.getPackageName();
         Bundle extras = sbn.getNotification().extras;
         String title = extras.getString("android.title");
         String text = extras.getCharSequence("android.text").toString();
@@ -45,10 +46,9 @@ public class NotifService extends NotificationListenerService {
         {
             msgrcv.putExtra("app name", "unknown application");
         }
-        //msgrcv.putExtra("ticker", ticker);
         msgrcv.putExtra("title", title);
         msgrcv.putExtra("text", text);
-
+        msgrcv.putExtra("package",package_name);
         LocalBroadcastManager.getInstance(context).sendBroadcast(msgrcv);
 
     }

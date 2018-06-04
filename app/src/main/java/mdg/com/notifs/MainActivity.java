@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.RequiresApi;
@@ -18,16 +20,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    ListView listView;
-    ArrayList<String> notifsList;
     private static final String DATABASE_NAME = "notifications_database";
     NotifDatabase database;
+    ImageView imageView;
 
 
     @Override
@@ -36,11 +38,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         //startService(new Intent(this, NotifService.class));
 
-        String currentDBPath = getDatabasePath(DATABASE_NAME).getAbsolutePath();
-
-        listView = (ListView) findViewById(R.id.list);
+        imageView = findViewById(R.id.imageView);
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Msg"));
-        notifsList = new ArrayList<>();
 
         database = Room.databaseBuilder(getApplicationContext(),NotifDatabase.class,DATABASE_NAME)
                 .fallbackToDestructiveMigration()
@@ -54,16 +53,25 @@ public class MainActivity extends AppCompatActivity {
             final String title = intent.getStringExtra("title");
             final String text = intent.getStringExtra("text");
             final String app_name = intent.getStringExtra("app name");
+            final String packageName = intent.getStringExtra("package");
 
             Log.e("title", title);
             Log.e("text", text);
             Log.e("app_name", app_name);
-            notifsList.add(title);
+            Log.e("Packa", packageName);
 
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getApplicationContext(),
-                    android.R.layout.simple_list_item_1, android.R.id.text1,
-                    notifsList);
-            listView.setAdapter(adapter);
+           /*
+                getting the icon of the application sending the notification throguh its package name
+            */
+            try {
+
+                Drawable icon = getPackageManager().getApplicationIcon(packageName);
+                imageView.setImageDrawable(icon);
+
+            }
+            catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
 
             new Thread(new Runnable() {
                 @Override
