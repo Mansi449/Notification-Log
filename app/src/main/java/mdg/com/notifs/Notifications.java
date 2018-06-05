@@ -25,6 +25,7 @@ public class Notifications {
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     private byte[] image;
 
+
     public byte[] getImage() {
         return image;
     }

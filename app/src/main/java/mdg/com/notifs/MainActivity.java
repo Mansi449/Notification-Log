@@ -30,6 +30,8 @@ import android.widget.ListView;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,21 +39,13 @@ public class MainActivity extends AppCompatActivity {
     NotifDatabase database;
     byte[] byteArray;
     private ArrayList<Notifications> notifList = new ArrayList<>();
-    private RecyclerView recyclerView;
-    private NotificationsAdapter mAdapter;
-    private Notifications notif;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         startService(new Intent(this, NotifService.class));
-
-        recyclerView = findViewById(R.id.recyclerView);
-        mAdapter = new NotificationsAdapter(notifList);
-        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
-        recyclerView.setLayoutManager(mLayoutManager);
-        recyclerView.setAdapter(mAdapter);
 
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Msg"));
 
@@ -65,11 +59,18 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 notifList = (ArrayList<Notifications>) database.daoAccess().getAll();
-                mAdapter.notifyDataSetChanged();
                 Log.e("added to", "recycler view");
                 Log.e("list 0", notifList.get(0).toString());
+                Log.e("notifList size:", Integer.toString(notifList.size()));
+                Collections.reverse(notifList);
+                RecyclerView recyclerView = findViewById(R.id.recyclerView);
+                NotificationsAdapter mAdapter = new NotificationsAdapter(notifList);
+                RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+                recyclerView.setLayoutManager(mLayoutManager);
+                recyclerView.setAdapter(mAdapter);
             }
         }) .start();
+        Log.e("notifList size:OUTSIDE ", Integer.toString(notifList.size()));
 
     }
 
