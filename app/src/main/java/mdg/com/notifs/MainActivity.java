@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -15,6 +16,8 @@ import android.support.annotation.RequiresApi;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,6 +36,10 @@ public class MainActivity extends AppCompatActivity {
     private static final String DATABASE_NAME = "notifications_database";
     NotifDatabase database;
     byte[] byteArray;
+    private ArrayList<Notifications> notifList = new ArrayList<>();
+    private RecyclerView recyclerView;
+    private NotificationsAdapter mAdapter;
+    private Notifications notif;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,15 +47,29 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         startService(new Intent(this, NotifService.class));
 
+        recyclerView = findViewById(R.id.recyclerView);
+        mAdapter = new NotificationsAdapter(notifList);
+        RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
+        recyclerView.setLayoutManager(mLayoutManager);
+        recyclerView.setAdapter(mAdapter);
+
         LocalBroadcastManager.getInstance(this).registerReceiver(onNotice, new IntentFilter("Msg"));
 
         /*
             Initializing the database
          */
         database = Room.databaseBuilder(getApplicationContext(),NotifDatabase.class,DATABASE_NAME)
-                .fallbackToDestructiveMigration()
                 .build();
-        }
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                notifList = (ArrayList<Notifications>) database.daoAccess().getAll();
+                mAdapter.notifyDataSetChanged();
+            }
+        }) .start();
+
+    }
 
     private BroadcastReceiver onNotice = new BroadcastReceiver() {
 
@@ -81,8 +102,7 @@ public class MainActivity extends AppCompatActivity {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.WEBP,25,stream); // Compress the bitmap with WEBP format and quality 25%
                 byteArray = stream.toByteArray();
-
-                //imageView.setImageDrawable(icon);
+                Bitmap compressedBitmap = BitmapFactory.decodeByteArray(byteArray,0,byteArray.length);
             }
             catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
