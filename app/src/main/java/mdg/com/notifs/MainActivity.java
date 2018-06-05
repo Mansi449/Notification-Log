@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -23,14 +22,10 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.ListView;
+import android.widget.TextView;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 
 public class MainActivity extends AppCompatActivity {
@@ -58,11 +53,14 @@ public class MainActivity extends AppCompatActivity {
         new Thread(new Runnable() {
             @Override
             public void run() {
-                notifList = (ArrayList<Notifications>) database.daoAccess().getAll();
-                Log.e("added to", "recycler view");
-                Log.e("list 0", notifList.get(0).toString());
-                Log.e("notifList size:", Integer.toString(notifList.size()));
-                Collections.reverse(notifList);
+                notifList = (ArrayList<Notifications>) database.daoAccess().getAll(); //storing all the rows of database in notifList
+
+                TextView text = findViewById(R.id.text);
+                if(notifList.size()>0){
+                    text.setVisibility(View.GONE);
+                }
+
+                Collections.reverse(notifList); //to display the latest notification at the top
                 RecyclerView recyclerView = findViewById(R.id.recyclerView);
                 NotificationsAdapter mAdapter = new NotificationsAdapter(notifList);
                 RecyclerView.LayoutManager mLayoutManager = new LinearLayoutManager(getApplicationContext());
@@ -70,7 +68,6 @@ public class MainActivity extends AppCompatActivity {
                 recyclerView.setAdapter(mAdapter);
             }
         }) .start();
-        Log.e("notifList size:OUTSIDE ", Integer.toString(notifList.size()));
 
     }
 
@@ -87,11 +84,6 @@ public class MainActivity extends AppCompatActivity {
             final String app_name = intent.getStringExtra("app name");
             final String packageName = intent.getStringExtra("package");
 
-            Log.e("title", title);
-            Log.e("text", text);
-            Log.e("app_name", app_name);
-            Log.e("Packa", packageName);
-
            /*
                 getting the icon of the application sending the notification throguh its package name
             */
@@ -105,7 +97,6 @@ public class MainActivity extends AppCompatActivity {
                 ByteArrayOutputStream stream = new ByteArrayOutputStream();
                 bitmap.compress(Bitmap.CompressFormat.WEBP,25,stream); // Compress the bitmap with WEBP format and quality 25%
                 byteArray = stream.toByteArray();
-                Bitmap compressedBitmap = BitmapFactory.decodeByteArray(byteArray,0,byteArray.length);
             }
             catch (PackageManager.NameNotFoundException e) {
                 e.printStackTrace();
@@ -114,7 +105,6 @@ public class MainActivity extends AppCompatActivity {
             /*
                 Storing the notification details in the database
              */
-
             new Thread(new Runnable() {
                 @Override
                 public void run() {
@@ -124,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
                     notification.setNotifText(text);
                     notification.setImage(byteArray);
                     database.daoAccess ().insertSingleNotification(notification);
-                    Log.e("added to", "database");
                 }
             }) .start();
         }

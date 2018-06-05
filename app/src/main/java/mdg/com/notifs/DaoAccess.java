@@ -3,8 +3,6 @@ package mdg.com.notifs;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.Query;
-
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -14,8 +12,8 @@ import java.util.List;
 @Dao
 public interface DaoAccess {
     @Insert
-    void insertSingleNotification (Notifications notif);
+    void insertSingleNotification (Notifications notif); //add a single row to the database
 
     @Query("SELECT * FROM notifications_table")
-    List<Notifications> getAll();
+    List<Notifications> getAll(); //getting all rows of database
 }

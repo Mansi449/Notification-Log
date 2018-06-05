@@ -10,6 +10,10 @@ import android.arch.persistence.room.PrimaryKey;
 @Entity(tableName = "notifications_table")
 public class Notifications {
 
+    /*
+        Defining all the columns of the database
+     */
+
     @PrimaryKey(autoGenerate = true)
     private int notif_id;
 

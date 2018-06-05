@@ -34,6 +34,10 @@ public class NotifService extends NotificationListenerService {
         String title = extras.getString("android.title");
         String text = extras.getCharSequence("android.text").toString();
         Intent msgrcv = new Intent("Msg");
+
+        /*
+            Getting name of the application from its package name
+         */
         try
         {
             PackageManager packageManager = getApplicationContext().getPackageManager();
