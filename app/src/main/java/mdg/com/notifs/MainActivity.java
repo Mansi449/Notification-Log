@@ -66,6 +66,8 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 notifList = (ArrayList<Notifications>) database.daoAccess().getAll();
                 mAdapter.notifyDataSetChanged();
+                Log.e("added to", "recycler view");
+                Log.e("list 0", notifList.get(0).toString());
             }
         }) .start();
 
@@ -121,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
                     notification.setNotifText(text);
                     notification.setImage(byteArray);
                     database.daoAccess ().insertSingleNotification(notification);
+                    Log.e("added to", "database");
                 }
             }) .start();
         }
